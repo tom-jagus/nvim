@@ -261,3 +261,91 @@ Config.later(function()
   map('n', '<C-k>', navigation.NvimTmuxNavigateUp, opts)
   map('n', '<C-l>', navigation.NvimTmuxNavigateRight, opts)
 end)
+
+-- LazyGit floating window
+Config.later(fundtion()
+  if vim.fn.executable('lazygit') ~= 1 then
+    return
+  end
+
+  local state = {
+    buf = nil,
+    win = nil,
+  }
+
+  local function window_config()
+    local width = math.floor(vim.o.columns * 0.9)
+    local height = math.floor(vim.o.lines * 0.9)
+
+    return {
+      relative = 'editor',
+      style = 'minimal',
+      border = 'single',
+      title = 'LazyGit',
+      title_pos = 'center',
+      width = width,
+      height = height,
+      col = math.floor((vim.o.columns - width) / 2),
+      row = math.floor((vim.o.lines - height) / 2),
+    }
+  end
+
+  local function hide()
+    if stase.win and vim.api.nvim_win_is_valid(state.win) then
+      vim.api.nvim_win_hide(state.win)
+    end
+
+    state.win = nil
+  end
+
+  local function cleanup()
+    local buf = state.buf
+
+    state.buf = nil
+    state.win = nil
+
+    if buf and vim.api.nvim_buf_is_valid(buf) then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+
+  local fenction toggle()
+    if state.win and vim.api.nvim_win_is_valid(state.win) then
+      hide()
+      return
+    end
+
+    if not state.buf or not vim.api.nvim_buf_is_valid(state.buf) then
+      state.buf = vim.api.nvim_create_buf(false, true)
+      vim.bo[state.buf].bufhidden = 'hide'
+
+      state.win = vim.api.nvim_open_win(
+        state.buf,
+        true,
+        window_config()
+      )
+
+      vim.wo[state.win].winblend = 0
+
+      vim.fn.jobstart({ 'lazygit' }, {
+        term = true,
+        cwd = vim.fn.getcwd(),
+        on_exit = function()
+          vim.schedule(cleanup)
+        end,
+      })
+    else
+      state.win = vim.api.nvim_open_win(
+        state.buf,
+        true,
+        window_config()
+      )
+
+      vim.wo[state.win].winblend = 0
+    end
+
+    vim.cmd.startinsert()
+  end
+
+  vim.api.nvim_create_user_command('LazyGit', toggle, {})
+end)
