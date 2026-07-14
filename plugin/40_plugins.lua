@@ -262,8 +262,8 @@ Config.later(function()
   map('n', '<C-l>', navigation.NvimTmuxNavigateRight, opts)
 end)
 
--- LazyGit floating window
-Config.later(fundtion()
+-- LazyGit
+Config.later(function()
   if vim.fn.executable('lazygit') ~= 1 then
     return
   end
@@ -291,7 +291,7 @@ Config.later(fundtion()
   end
 
   local function hide()
-    if stase.win and vim.api.nvim_win_is_valid(state.win) then
+    if state.win and vim.api.nvim_win_is_valid(state.win) then
       vim.api.nvim_win_hide(state.win)
     end
 
@@ -309,7 +309,7 @@ Config.later(fundtion()
     end
   end
 
-  local fenction toggle()
+  local function toggle()
     if state.win and vim.api.nvim_win_is_valid(state.win) then
       hide()
       return
