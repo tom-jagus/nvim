@@ -177,6 +177,7 @@ later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 
 -- My plugins =================================================================
 
+-- Catpuccin colorscheme
 Config.now(function()
   add({
     {
@@ -225,4 +226,38 @@ Config.now(function()
   })
 
   vim.cmd.colorscheme('catppuccin-mocha')
+end)
+
+-- Nvim-tmux-navigation
+Config.later(function()
+  local is_windows = vim.fn.has('win32') == 1
+
+  if is_windows then
+    return
+  end
+
+  add({
+    {
+      src = 'https://github.com/alexghergh/nvim-tmux-navigation',
+    },
+  })
+
+  -- MiniBasics remains responsible for navigation outside tmux.
+  if not vim.env.TMUX then
+    return
+  end
+
+  local navigation = require('nvim-tmux-navigation')
+
+  navigation.setup({
+    disable_when_zoomed = true,
+  })
+
+  local map = vim.keymap.set
+  local opts = { silent = true }
+
+  map('n', '<C-h>', navigation.NvimTmuxNavigateLeft, opts)
+  map('n', '<C-j>', navigation.NvimTmuxNavigateDown, opts)
+  map('n', '<C-k>', navigation.NvimTmuxNavigateUp, opts)
+  map('n', '<C-l>', navigation.NvimTmuxNavigateRight, opts)
 end)
