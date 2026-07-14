@@ -437,7 +437,7 @@ later(function() require('mini.cmdline').setup() end)
 --
 -- The built-in `:h commenting` is based on 'mini.comment'. Yet this module is
 -- still enabled as it provides more customization opportunities.
-later(function() require('mini.comment').setup() end)
+-- later(function() require('mini.comment').setup() end)
 
 -- Autohighlight word under cursor with a customizable delay.
 -- Word boundaries are defined based on `:h 'iskeyword'` option.
