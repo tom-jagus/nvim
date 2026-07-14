@@ -60,7 +60,7 @@ vim.o.scrolloff      = 8          -- Leave extra space when scrolling
 vim.o.cursorlineopt  = 'screenline,number' -- Show cursor line per screen line
 
 -- Special UI symbols. More is set via 'mini.basics' later.
-vim.o.fillchars = 'eob:~ ,fold:╌'
+vim.o.fillchars = 'eob:~,fold:╌'
 vim.o.listchars = 'extends:…,nbsp:␣,precedes:…,tab:> '
 
 -- Folds (see `:h fold-commands`, `:h zM`, `:h zR`, `:h zA`, `:h zj`)
