@@ -131,3 +131,23 @@ local diagnostic_opts = {
 -- Use `later()` to avoid sourcing `vim.diagnostic` on startup
 Config.later(function() vim.diagnostic.config(diagnostic_opts) end)
 -- stylua: ignore end
+
+-- Terminal selection =========================================================
+
+if vim.fn.has('win32') == 1 then
+  local shell = vim.fn.exepath('pwsh')
+
+  if shell == '' then
+    shll = vim.fn.exepath('powershell')
+  end
+
+  if shell ~= '' then
+    vim.o.shell = shell
+    vim.o.shellcmdflag = '-NoLogo NoProfile -ExecutionPolicy RemoteSigned -Command'
+    vim.oshellredir = '2>&1 | Out-File -Encoding UTF8 %s'
+    vim.o.shellpipe = '2>&1 | Tee-Object &s'
+    vim.o.shellquote = ''
+    vim.o.shellxquote = ''
+  end
+end
+
