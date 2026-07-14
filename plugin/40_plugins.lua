@@ -174,3 +174,55 @@ later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 --   -- Enable only one
 --   vim.cmd('color everforest')
 -- end)
+
+-- My plugins =================================================================
+
+Config.now(function()
+  add({
+    {
+      src = 'https://github.com/catppuccin/nvim',
+      name = 'catppuccin',
+    },
+  })
+
+  require('catppuccin').setup({
+    flavour = 'mocha',
+    transparent_background = true,
+
+    -- Keep floating windows readable over a transparent terminal.
+    float = {
+      transparent = false,
+      solid = false,
+    },
+
+    -- Usefull for :terminal buffers.
+    term_colors = true,
+
+    -- Keep integrations explicit.
+    default_integrations = false,
+    integrations = {
+      mini = {
+        enabled = true,
+        indentscope_color = 'lavender',
+      },
+    },
+
+    -- Customized highlights
+    custom_highlights = function(colors)
+      return {
+        LineNr = {
+          fg = colors.subtext1,
+        },
+        CursorLineNr = {
+          fg = colors.lavender,
+          style = { 'bold' },
+        },
+        EndOfBuffer = {
+          fg = colors.subtext1,
+        },
+      }
+    end,
+  })
+
+  vim.cmd.colorscheme('catppuccin-mocha')
+end)
