@@ -132,7 +132,7 @@ local diagnostic_opts = {
 Config.later(function() vim.diagnostic.config(diagnostic_opts) end)
 -- stylua: ignore end
 
--- Terminal selection =========================================================
+-- Terminal selection (Windows compatibile) ===================================
 
 if vim.fn.has('win32') == 1 then
   local shell
@@ -179,3 +179,11 @@ if vim.fn.has('win32') == 1 then
   end
 end
 
+-- Terminal not visible in tabline
+local terminal_group = vim.api.nvim_create_augroup('ConfigTerminal', { clear = true })
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = terminal_group,
+  desc = 'Configure terminal buffers',
+  command = 'setlocal nobuflisted bufhidden=wipe',
+})
