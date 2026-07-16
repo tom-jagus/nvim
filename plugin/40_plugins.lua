@@ -39,37 +39,62 @@ local now_if_args, later = Config.now_if_args, Config.later
 --   (see MiniMax README section for software requirements).
 now_if_args(function()
   -- Define hook to update tree-sitter parsers after plugin is updated
-  local ts_update = function() vim.cmd('TSUpdate') end
-  Config.on_packchanged('nvim-treesitter', { 'update' }, ts_update, ':TSUpdate')
+  local ts_update = function()
+    vim.cmd("TSUpdate")
+  end
+  Config.on_packchanged("nvim-treesitter", { "update" }, ts_update, ":TSUpdate")
 
   add({
-    'https://github.com/nvim-treesitter/nvim-treesitter',
-    'https://github.com/nvim-treesitter/nvim-treesitter-textobjects',
+    "https://github.com/nvim-treesitter/nvim-treesitter",
+    "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
   })
 
   -- Define languages which will have parsers installed and auto enabled
   -- After changing this, restart Neovim once to install necessary parsers. Wait
   -- for the installation to finish before opening a file for added language(s).
   local languages = {
-    -- These are already pre-installed with Neovim. Used as an example.
-    'lua',
-    'vim',
-    'vimdoc',
-    'query',
-    'markdown',
-    'markdown_inline',
-    'python',
-    -- Add here more languages with which you want to use tree-sitter
-    -- To see available languages:
-    -- - Execute `:=require('nvim-treesitter').get_available()`
-    -- - Visit 'SUPPORTED_LANGUAGES.md' file at
-    --   https://github.com/nvim-treesitter/nvim-treesitter/blob/main
+    --Neovim configuration
+    "lua",
+    "vim",
+    "vimdoc",
+    "query",
+
+    -- Writing
+    "markdown",
+    "markdown_inline",
+
+    -- Programming languages
+    "python",
+    "c_sharp",
+
+    -- Shell
+    "bash",
+
+    -- Web
+    "html",
+    "css",
+    "scss",
+    "javascript",
+    "typescript",
+    "tsx",
+
+    -- Structured data and config
+    "json",
+    "yaml",
+    "toml",
+
+    -- Data and databases
+    "csv",
+    "tsv",
+    "sql",
   }
   local isnt_installed = function(lang)
-    return #vim.api.nvim_get_runtime_file('parser/' .. lang .. '.*', false) == 0
+    return #vim.api.nvim_get_runtime_file("parser/" .. lang .. ".*", false) == 0
   end
   local to_install = vim.tbl_filter(isnt_installed, languages)
-  if #to_install > 0 then require('nvim-treesitter').install(to_install) end
+  if #to_install > 0 then
+    require("nvim-treesitter").install(to_install)
+  end
 
   -- Enable tree-sitter after opening a file for a target language
   local filetypes = {}
@@ -78,8 +103,10 @@ now_if_args(function()
       table.insert(filetypes, ft)
     end
   end
-  local ts_start = function(ev) vim.treesitter.start(ev.buf) end
-  Config.new_autocmd('FileType', filetypes, ts_start, 'Start tree-sitter')
+  local ts_start = function(ev)
+    vim.treesitter.start(ev.buf)
+  end
+  Config.new_autocmd("FileType", filetypes, ts_start, "Start tree-sitter")
 end)
 
 -- Language servers ===========================================================
@@ -101,17 +128,48 @@ end)
 -- Troubleshooting:
 -- - Run `:checkhealth vim.lsp` to see potential issues.
 now_if_args(function()
-  add({ 'https://github.com/neovim/nvim-lspconfig' })
+  add({ "https://github.com/neovim/nvim-lspconfig" })
 
   -- Use `:h vim.lsp.enable()` to automatically enable language server based on
   -- the rules provided by 'nvim-lspconfig'.
   -- Use `:h vim.lsp.config()` or 'after/lsp/' directory to configure servers.
   -- Uncomment and tweak the following `vim.lsp.enable()` call to enable servers.
   vim.lsp.enable({
-    'lua_ls',
-    'basedpyright',
-    'ruff',
-    'markdown_oxide',
+    -- Neovim
+    "lua_ls",
+    'lua-language-server',
+    'stylua',
+
+    -- Writing
+    "markdown_oxide",
+
+    -- Programming languages
+    "ruff",
+    "basedpyright",
+    'roslyn_ls',
+
+    -- Shell
+    'bashls',
+    'bash-language-server',
+
+    -- Web
+    'html',
+    'html-lsp',
+    'cssls',
+    'css-lsp',
+    'jsonls',
+    'json-lsp',
+    'ts_ls',
+    'harper-ls',
+
+    -- Structured data and config
+    'yaml-language-server',
+    'yamlls',
+    'taplo',
+
+    -- Data and databases
+    'sqlls',
+    'sqruff',
   })
 end)
 
@@ -124,22 +182,48 @@ end)
 -- The 'stevearc/conform.nvim' plugin is a good and maintained solution for easier
 -- formatting setup.
 later(function()
-  add({ 'https://github.com/stevearc/conform.nvim' })
+  add({ "https://github.com/stevearc/conform.nvim" })
 
   -- See also:
   -- - `:h Conform`
   -- - `:h conform-options`
   -- - `:h conform-formatters`
-  require('conform').setup({
+  local prettier = { 'prettier' }
+  require("conform").setup({
     default_format_opts = {
       -- Allow formatting from LSP server if no dedicated formatter is available
-      lsp_format = 'fallback',
+      lsp_format = "fallback",
     },
     -- Map of filetype to formatters
     -- Make sure that necessary CLI tool is available
     formatters_by_ft = {
-      lua = { 'stylua' },
-      python = { 'ruff_format' },
+      -- Neovim
+      lua = { "stylua" },
+
+      -- Writing
+
+      -- Programming languages
+      python = { "ruff_format" },
+
+      -- Shell
+
+      -- Web
+      html = prettier,
+      css = prettier,
+      scss = prettier,
+      javascript = prettier,
+      javscriptreact = prettier,
+      typescript = prettier,
+      typescriptreact = prettier,
+
+      -- Structured data and config
+      json = prettier,
+      jsonc = prettier,
+      yaml = prettier,
+      toml = { 'taplo' },
+
+      -- Data and databases
+      sql = { 'sqruff' },
     },
   })
 end)
@@ -153,7 +237,9 @@ end)
 -- snippet files. They are organized in 'snippets/' directory (mostly) per language.
 -- 'mini.snippets' is designed to work with it as seamlessly as possible.
 -- See `:h MiniSnippets.gen_loader.from_lang()`.
-later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
+later(function()
+  add({ "https://github.com/rafamadriz/friendly-snippets" })
+end)
 
 -- Honorable mentions =========================================================
 
@@ -189,21 +275,21 @@ later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 
 -- Mason
 now_if_args(function()
-  add({ 'https://github.com/mason-org/mason.nvim' })
-  require('mason').setup()
+  add({ "https://github.com/mason-org/mason.nvim" })
+  require("mason").setup()
 end)
 
 -- Catpuccin colorscheme
 Config.now(function()
   add({
     {
-      src = 'https://github.com/catppuccin/nvim',
-      name = 'catppuccin',
+      src = "https://github.com/catppuccin/nvim",
+      name = "catppuccin",
     },
   })
 
-  require('catppuccin').setup({
-    flavour = 'mocha',
+  require("catppuccin").setup({
+    flavour = "mocha",
     transparent_background = true,
 
     -- Keep floating windows readable over a transparent terminal.
@@ -220,7 +306,7 @@ Config.now(function()
     integrations = {
       mini = {
         enabled = true,
-        indentscope_color = 'lavender',
+        indentscope_color = "lavender",
       },
     },
 
@@ -232,7 +318,7 @@ Config.now(function()
         },
         CursorLineNr = {
           fg = colors.lavender,
-          style = { 'bold' },
+          style = { "bold" },
         },
         EndOfBuffer = {
           fg = colors.subtext1,
@@ -241,12 +327,12 @@ Config.now(function()
     end,
   })
 
-  vim.cmd.colorscheme('catppuccin-mocha')
+  vim.cmd.colorscheme("catppuccin-mocha")
 end)
 
 -- Nvim-tmux-navigation
 Config.later(function()
-  local is_windows = vim.fn.has('win32') == 1
+  local is_windows = vim.fn.has("win32") == 1
 
   if is_windows then
     return
@@ -254,7 +340,7 @@ Config.later(function()
 
   add({
     {
-      src = 'https://github.com/alexghergh/nvim-tmux-navigation',
+      src = "https://github.com/alexghergh/nvim-tmux-navigation",
     },
   })
 
@@ -263,7 +349,7 @@ Config.later(function()
     return
   end
 
-  local navigation = require('nvim-tmux-navigation')
+  local navigation = require("nvim-tmux-navigation")
 
   navigation.setup({
     disable_when_zoomed = true,
@@ -272,47 +358,46 @@ Config.later(function()
   local map = vim.keymap.set
   local opts = { silent = true }
 
-  map('n', '<C-h>', navigation.NvimTmuxNavigateLeft, opts)
-  map('n', '<C-j>', navigation.NvimTmuxNavigateDown, opts)
-  map('n', '<C-k>', navigation.NvimTmuxNavigateUp, opts)
-  map('n', '<C-l>', navigation.NvimTmuxNavigateRight, opts)
+  map("n", "<C-h>", navigation.NvimTmuxNavigateLeft, opts)
+  map("n", "<C-j>", navigation.NvimTmuxNavigateDown, opts)
+  map("n", "<C-k>", navigation.NvimTmuxNavigateUp, opts)
+  map("n", "<C-l>", navigation.NvimTmuxNavigateRight, opts)
 end)
 
 -- LazyGit
 Config.later(function()
-  if vim.fn.executable('lazygit') ~= 1 then
+  if vim.fn.executable("lazygit") ~= 1 then
     return
   end
 
-  vim.api.nvim_create_user_command('LazyGit', function()
+  vim.api.nvim_create_user_command("LazyGit", function()
     local width = math.floor(vim.o.columns * 0.9)
     local height = math.floor(vim.o.lines * 0.9)
 
     local buf = vim.api.nvim_create_buf(false, true)
 
     local normal_float = vim.api.nvim_get_hl(0, {
-      name = 'NormalFloat',
+      name = "NormalFloat",
       link = false,
     })
 
     if normal_float.bg then
-      vim.b[buf].terminal_color_0 =
-        string.format('#%06x', normal_float.bg)
+      vim.b[buf].terminal_color_0 = string.format("#%06x", normal_float.bg)
     end
 
     local win = vim.api.nvim_open_win(buf, true, {
-      relative = 'editor',
-      style = 'minimal',
-      border = 'single',
-      title = ' LazyGit ',
-      title_pos = 'center',
+      relative = "editor",
+      style = "minimal",
+      border = "single",
+      title = " LazyGit ",
+      title_pos = "center",
       width = width,
       height = height,
       col = math.floor((vim.o.columns - width) / 2),
       row = math.floor((vim.o.lines - height) / 2),
     })
 
-    vim.wo[win].winhighlight = 'Normal:NormalFloat'
+    vim.wo[win].winhighlight = "Normal:NormalFloat"
 
     vim.wo[win].winblend = 8
 
@@ -326,7 +411,7 @@ Config.later(function()
       end
     end
 
-    local job = vim.fn.jobstart({ 'lazygit' }, {
+    local job = vim.fn.jobstart({ "lazygit" }, {
       term = true,
       cwd = vim.fn.getcwd(),
 
@@ -337,15 +422,12 @@ Config.later(function()
 
     if job <= 0 then
       cleanup()
-      vim.notify(
-        'Could not start LazyGit',
-        vim.log.level.ERROR
-      )
+      vim.notify("Could not start LazyGit", vim.log.level.ERROR)
       return
     end
 
     vim.cmd.startinsert()
   end, {
-    desc = 'Open LazyGit in a floating terminal',
+    desc = "Open LazyGit in a floating terminal",
   })
 end)
