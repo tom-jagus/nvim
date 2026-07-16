@@ -274,6 +274,16 @@ Config.later(function()
 
     local buf = vim.api.nvim_create_buf(false, true)
 
+    local normal_float = vim.api.nvim_get_hl(0, {
+      name = 'NormalFloat',
+      link = false,
+    })
+
+    if normal_float.bg then
+      vim.b[buf].terminal_color_0 =
+        string.format('#%06x', normal_float.bg)
+    end
+
     local win = vim.api.nvim_open_win(buf, true, {
       relative = 'editor',
       style = 'minimal',
@@ -286,7 +296,9 @@ Config.later(function()
       row = math.floor((vim.o.lines - height) / 2),
     })
 
-    vim.wo[win].winblend = 0
+    vim.wo[win].winhighlight = 'Normal:NormalFloat'
+
+    vim.wo[win].winblend = 8
 
     local function cleanup()
       if vim.api.nvim_win_is_valid(win) then
