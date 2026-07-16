@@ -53,8 +53,12 @@ now_if_args(function()
   local languages = {
     -- These are already pre-installed with Neovim. Used as an example.
     'lua',
+    'vim',
     'vimdoc',
+    'query',
     'markdown',
+    'markdown_inline',
+    'python',
     -- Add here more languages with which you want to use tree-sitter
     -- To see available languages:
     -- - Execute `:=require('nvim-treesitter').get_available()`
@@ -103,9 +107,12 @@ now_if_args(function()
   -- the rules provided by 'nvim-lspconfig'.
   -- Use `:h vim.lsp.config()` or 'after/lsp/' directory to configure servers.
   -- Uncomment and tweak the following `vim.lsp.enable()` call to enable servers.
-  -- vim.lsp.enable({
-  --   -- For example, if `lua-language-server` is installed, use `'lua_ls'` entry
-  -- })
+  vim.lsp.enable({
+    'lua_ls',
+    'basedpyright',
+    'ruff',
+    'markdown_oxide',
+  })
 end)
 
 -- Formatting =================================================================
@@ -130,7 +137,10 @@ later(function()
     },
     -- Map of filetype to formatters
     -- Make sure that necessary CLI tool is available
-    -- formatters_by_ft = { lua = { 'stylua' } },
+    formatters_by_ft = {
+      lua = { 'stylua' },
+      python = { 'ruff_format' },
+    },
   })
 end)
 
@@ -176,6 +186,12 @@ later(function() add({ 'https://github.com/rafamadriz/friendly-snippets' }) end)
 -- end)
 
 -- My plugins =================================================================
+
+-- Mason
+now_if_args(function()
+  add({ 'https://github.com/mason-org/mason.nvim' })
+  require('mason').setup()
+end)
 
 -- Catpuccin colorscheme
 Config.now(function()
