@@ -135,17 +135,45 @@ Config.later(function() vim.diagnostic.config(diagnostic_opts) end)
 -- Terminal selection =========================================================
 
 if vim.fn.has('win32') == 1 then
-  local shell = vim.fn.exepath('pwsh')
+  local shell
+  local is_pwsh = false
 
-  if shell == '' then
-    shll = vim.fn.exepath('powershell')
+  if vim.fn.executable('pwsh') == 1 then
+    shell = 'pwsh'
+    is_pwsh = true
+  elseif vim.fn.executable('powershell') == 1 then
+    shll = 'powershell'
   end
 
-  if shell ~= '' then
+
+  if shell then
     vim.o.shell = shell
-    vim.o.shellcmdflag = '-NoLogo NoProfile -ExecutionPolicy RemoteSigned -Command'
-    vim.oshellredir = '2>&1 | Out-File -Encoding UTF8 %s'
-    vim.o.shellpipe = '2>&1 | Tee-Object &s'
+
+    vim.o.shelltemp = false
+
+    local command_preamble =
+      '[Console]::InputEncoding='
+      .. '[Console]::OutputEncoding='
+      .. '[System.Text.UTF8Encoding]::new();'
+      .. '$PSDefaultParametersValues["Out-File:Encoding"]="utf8";'
+
+    if is_pwsh then
+      command_preamble =
+        command_preamble
+        .. '$PSStyle.OutputRendering="PlainText";'
+
+      vim.env.__SuppressAnsiEscapeSequences = '1'
+    end
+
+    vim.o.shellcmdflag =
+      '-NoLogo '
+      .. '-NoProfile '
+      .. '-NonInteractive '
+      .. '-ExecutionPolicy RemoteSigned'
+      .. '-Command '
+      .. command_preamble
+
+    vim.o.shellpipe = '> %s 2>&1'
     vim.o.shellquote = ''
     vim.o.shellxquote = ''
   end
