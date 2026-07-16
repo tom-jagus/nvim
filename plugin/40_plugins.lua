@@ -268,84 +268,56 @@ Config.later(function()
     return
   end
 
-  local state = {
-    buf = nil,
-    win = nil,
-  }
-
-  local function window_config()
+  vim.api.nvim_create_user_command('LazyGit', function()
     local width = math.floor(vim.o.columns * 0.9)
     local height = math.floor(vim.o.lines * 0.9)
 
-    return {
+    local buf = vim.api.nvim_create_buf(false, true)
+
+    local win = vim.api.nvim_open_win(buf, true, {
       relative = 'editor',
       style = 'minimal',
       border = 'single',
-      title = 'LazyGit',
+      title = ' LazyGit ',
       title_pos = 'center',
       width = width,
       height = height,
       col = math.floor((vim.o.columns - width) / 2),
       row = math.floor((vim.o.lines - height) / 2),
-    }
-  end
+    })
 
-  local function hide()
-    if state.win and vim.api.nvim_win_is_valid(state.win) then
-      vim.api.nvim_win_hide(state.win)
+    vim.wo[win].winblend = 0
+
+    local function cleanup()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_win_close(win, true)
+      end
+
+      if vim.api.nvim_buf_is_valid(buf) then
+        vim.api.nvim_buf_delete(buf, { force = true })
+      end
     end
 
-    state.win = nil
-  end
+    local job = vim.fn.jobstart({ 'lazygit' }, {
+      term = true,
+      cwd = vim.fn.getcwd(),
 
-  local function cleanup()
-    local buf = state.buf
+      on_exit = function()
+        vim.schedule(cleanup)
+      end,
+    })
 
-    state.buf = nil
-    state.win = nil
-
-    if buf and vim.api.nvim_buf_is_valid(buf) then
-      vim.api.nvim_buf_delete(buf, { force = true })
-    end
-  end
-
-  local function toggle()
-    if state.win and vim.api.nvim_win_is_valid(state.win) then
-      hide()
+    if job <= 0 then
+      cleanup()
+      vim.notify(
+        'Could not start LazyGit',
+        vim.log.level.ERROR
+      )
       return
     end
 
-    if not state.buf or not vim.api.nvim_buf_is_valid(state.buf) then
-      state.buf = vim.api.nvim_create_buf(false, true)
-      vim.bo[state.buf].bufhidden = 'hide'
-
-      state.win = vim.api.nvim_open_win(
-        state.buf,
-        true,
-        window_config()
-      )
-
-      vim.wo[state.win].winblend = 0
-
-      vim.fn.jobstart({ 'lazygit' }, {
-        term = true,
-        cwd = vim.fn.getcwd(),
-        on_exit = function()
-          vim.schedule(cleanup)
-        end,
-      })
-    else
-      state.win = vim.api.nvim_open_win(
-        state.buf,
-        true,
-        window_config()
-      )
-
-      vim.wo[state.win].winblend = 0
-    end
-
     vim.cmd.startinsert()
-  end
-
-  vim.api.nvim_create_user_command('LazyGit', toggle, {})
+  end, {
+    desc = 'Open LazyGit in a floating terminal',
+  })
 end)
