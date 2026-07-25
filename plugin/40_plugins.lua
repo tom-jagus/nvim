@@ -431,3 +431,11 @@ Config.later(function()
     desc = "Open LazyGit in a floating terminal",
   })
 end)
+
+-- CSSView
+Config.later(function()
+  add({
+    {src = 'https://github.com/hat0uma/csvview.nvim'}
+  })
+  require('csvview').setup()
+end)
