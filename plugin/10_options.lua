@@ -144,7 +144,7 @@ if vim.fn.has('win32') == 1 then
     shell = 'pwsh'
     is_pwsh = true
   elseif vim.fn.executable('powershell') == 1 then
-    shll = 'powershell'
+    shell = 'powershell'
   end
 
 
@@ -157,7 +157,7 @@ if vim.fn.has('win32') == 1 then
       '[Console]::InputEncoding='
       .. '[Console]::OutputEncoding='
       .. '[System.Text.UTF8Encoding]::new();'
-      .. '$PSDefaultParametersValues["Out-File:Encoding"]="utf8";'
+      .. '$PSDefaultParameterValues["Out-File:Encoding"]="utf8";'
 
     if is_pwsh then
       command_preamble =
@@ -171,7 +171,7 @@ if vim.fn.has('win32') == 1 then
       '-NoLogo '
       .. '-NoProfile '
       .. '-NonInteractive '
-      .. '-ExecutionPolicy RemoteSigned'
+      .. '-ExecutionPolicy RemoteSigned '
       .. '-Command '
       .. command_preamble
 
