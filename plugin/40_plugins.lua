@@ -12,6 +12,44 @@
 local add = vim.pack.add
 local now_if_args, later = Config.now_if_args, Config.later
 
+-- Keep LSP configuration names and Mason Package names paired explicitly.
+-- The first value is used by 'vim.lsp.enable()'o the second by Mason
+local language_servers = {
+  -- Neovim
+  { lsp = 'lua_ls', mason = 'lua-language-server' },
+
+  -- Writing
+  { lps = 'markdown_oxide', mason = 'maskdownkoxide' },
+
+  -- Programming languages
+  { lsp = 'basedpyright', mason = 'basedpyright' },
+  { lsp = 'ruff', mason = 'ruff' },
+  { lsp = 'roslyn_ls', mason = 'typescript-language-server' },
+
+  -- Structured data and config
+  { lsp = 'yamlls', mason = 'yaml-language-server' },
+  { lsp = 'taplo', mason = 'taplo' },
+  
+  -- Data and databases
+  { lsp = 'sqruff', mason = 'sqruff' },
+}
+
+local lsp_names = vim.tbl_map(function(server)
+  return server.lsp
+end, language_servers)
+
+local mason_tools = vim.tbl_map(function(server)
+  return server.mason
+end, language_servers)
+
+vim.list_extend(mason_tools, {
+  -- Standalone formatters and linters
+  'prettier',
+  'shellcheck',
+  'shfmt',
+  'stylua',
+})
+
 -- Tree-sitter ================================================================
 
 -- Tree-sitter is a tool for fast incremental parsing. It converts text into
@@ -134,43 +172,7 @@ now_if_args(function()
   -- the rules provided by 'nvim-lspconfig'.
   -- Use `:h vim.lsp.config()` or 'after/lsp/' directory to configure servers.
   -- Uncomment and tweak the following `vim.lsp.enable()` call to enable servers.
-  vim.lsp.enable({
-    -- Neovim
-    "lua_ls",
-    'lua-language-server',
-    'stylua',
-
-    -- Writing
-    "markdown_oxide",
-
-    -- Programming languages
-    "ruff",
-    "basedpyright",
-    'roslyn_ls',
-
-    -- Shell
-    'bashls',
-    'bash-language-server',
-
-    -- Web
-    'html',
-    'html-lsp',
-    'cssls',
-    'css-lsp',
-    'jsonls',
-    'json-lsp',
-    'ts_ls',
-    'harper-ls',
-
-    -- Structured data and config
-    'yaml-language-server',
-    'yamlls',
-    'taplo',
-
-    -- Data and databases
-    'sqlls',
-    'sqruff',
-  })
+  vim.lsp.enable(lsp_names)
 end)
 
 -- Formatting =================================================================
@@ -274,9 +276,29 @@ end)
 -- My plugins =================================================================
 
 -- Mason
-now_if_args(function()
-  add({ "https://github.com/mason-org/mason.nvim" })
+Config.now(function()
+  add({
+    "https://github.com/mason-org/mason.nvim",
+    'https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim',
+  })
   require("mason").setup()
+
+  require('mason-tool-installer').setup({
+    ensure_installed = mason_tools,
+
+    -- Install missing tools on startup, but update only when requested
+    -- through `:MasonToolsUpdate` so tool changes remain deliberate.
+    run_on_start = true,
+    auto_update = false,
+    start_delay = 1000,
+
+    -- Every item above uses an exact Mason reqistry package name.
+    integrations = {
+      ['mason-lspconfig'] = false,
+      ['mason-null-ls'] = false,
+      ['mason-nvim-dap'] = false,
+    },
+  })
 end)
 
 -- Catpuccin colorscheme
@@ -432,7 +454,7 @@ Config.later(function()
   })
 end)
 
--- CSSView
+-- CSVView
 Config.later(function()
   add({
     {src = 'https://github.com/hat0uma/csvview.nvim'}
