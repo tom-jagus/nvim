@@ -480,6 +480,12 @@ now_if_args(function()
     },
   })
 
+  local vault_name        = 'second-brain'
+  local vault_path        = '~/vault/' .. vault_name
+  local inbox_path        = 'inbox'
+  local notes_path        = 'notes'
+  local attachments_path  = 'assets'
+
   local function slugify(title)
     local slug = vim.trim(title or 'untitled'):lower()
 
@@ -517,13 +523,13 @@ now_if_args(function()
 
     workspaces = {
       {
-        name = 'tom-jagus',
-        path = '~/vaults/tom-jagus',
+        name = vault_name,
+        path = vault_path,
         strict = true,
       },
     },
 
-    notes_subdir = 'notes',
+    notes_subdir = notes_path,
     new_notes_location = 'notes_subdir',
     note_id_func = note_id,
 
@@ -540,7 +546,7 @@ now_if_args(function()
     },
 
     attachments = {
-      folder = 'assets',
+      folder = attachments_path,
     },
 
     picker = {
@@ -636,17 +642,26 @@ now_if_args(function()
   end
 
   vim.api.nvim_create_user_command('VaultQuickNote', function()
-    prompt_for_note('Quick note title: ', 'inbox')
+    prompt_for_note('Quick note title: ', inbox_path)
   end, {
     desc = 'Open or create a vault inbox note',
   })
 
   vim.api.nvim_create_user_command('VaultNewNote', function()
-    prompt_for_note('New note title: ', 'notes')
+    prompt_for_note('New note title: ', notes_path)
   end, {
   desc = 'Open or create a dault note'
   })
+
+  -- Vault sync
+  require('custom.vault_sync').setup({
+    vault = vault_path,
+    debounce_ms = 60 * 1000,
+    sync_on_enter = true,
+    notify_auto_success = false,
+  })
 end)
+
 
 -- Render Markdown
 now_if_args(function()
@@ -704,10 +719,3 @@ now_if_args(function()
   vim.cmd('Mtm')
 end)
 
--- Vault sync
-require('custom.vault_sync').setup({
-  vault = '~/vaults/tom-jagus',
-  debounce_ms = 60 * 1000,
-  sync_on_enter = true,
-  notify_auto_success = false,
-})
