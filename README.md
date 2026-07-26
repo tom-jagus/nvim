@@ -45,7 +45,6 @@ small custom workflows over overlapping plugins.
 - [tmux](https://github.com/tmux/tmux) when cross-pane navigation is wanted on
   Linux or another non-Windows system
 - PowerShell 7 (`pwsh`) on Windows; Windows PowerShell is used as a fallback
-- The .NET SDK for C# and Roslyn
 
 Mason installs the configured language servers and formatters inside Neovim's
 data directory. Run `:checkhealth mason` if it reports missing platform tools.
@@ -80,7 +79,7 @@ if (Test-Path $target) {
   Move-Item $target "$target.backup"
 }
 
-git clone <repository-url> $target
+git clone https://github.com/tom-jagus/nvim $target
 nvim
 ```
 
@@ -130,8 +129,7 @@ must have an upstream before synchronization can run.
 │       ├── lua_ls.lua
 │       ├── markdown_oxide.lua
 │       └── ruff.lua
-├── docs/
-└── nvim-pack-lock.json
+└── docs/
 ```
 
 See [architecture](docs/architecture.md) for the responsibility and loading

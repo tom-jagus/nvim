@@ -5,7 +5,7 @@ All notable changes to this configuration are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and releases follow [Semantic Versioning](https://semver.org/).
 
-## [1.0.0] - 2026-07-26
+## [1.0.0] - 2026-07-27
 
 ### Added
 
@@ -21,7 +21,7 @@ and releases follow [Semantic Versioning](https://semver.org/).
 - Tree-sitter parsing for programming, web, data, configuration, and Markdown
   file types.
 - Native LSP with Mason-managed language servers for Lua, Markdown, Python,
-  C#, Bash, HTML, CSS, TypeScript, JSON, YAML, TOML, and SQL.
+  Bash, HTML, CSS, TypeScript, JSON, YAML, TOML, and SQL.
 - Conform-based explicit formatting with LSP fallback.
 - Git workflows through `mini.git`, `mini.diff`, and an optional floating
   LazyGit terminal.

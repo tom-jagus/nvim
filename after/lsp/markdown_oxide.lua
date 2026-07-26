@@ -2,11 +2,11 @@ local function normalize(path)
   return vim.fs.normalize(path):gsub('\\', '/')
 end
 
-local valut = normalize(vim.fn.expand('~/valuts/tom-jagus'))
+local vault = normalize(vim.fn.expand('~/vault/second-brain'))
 
 local function is_in_vault(path)
   path = normalize(path)
-  return path == valut or vim.startswith(path, vault .. '/')
+  return path == vault or vim.startswith(path, vault .. '/')
 end
 
 ---@type vim.lsp.Config

@@ -3,7 +3,7 @@ local M = {}
 local uv = vim.uv or vim.loop
 
 local defaults = {
-  vault = '~/vaults/second-brain',
+  vault = '~/vault/second-brain',
   debounce_ms = 60 * 1000,
   sync_on_enter = true,
   notify_auto_success = false,

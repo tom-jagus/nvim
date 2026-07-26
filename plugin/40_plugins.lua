@@ -489,7 +489,7 @@ now_if_args(function()
   local function slugify(title)
     local slug = vim.trim(title or 'untitled'):lower()
 
-    slug = slug:gsub('[@c<>:"/\\|?*]+', '-')
+    slug = slug:gsub('[%c<>:"/\\|?*]+', '-')
     slug = slug:gsub('[%s_]+', '-')
     slug = slug:gsub('%-+', '-')
     slug = slug:gsub('^[%.%- ]+', ''):gsub('[%.%- ]+$', '')
@@ -650,7 +650,7 @@ now_if_args(function()
   vim.api.nvim_create_user_command('VaultNewNote', function()
     prompt_for_note('New note title: ', notes_path)
   end, {
-  desc = 'Open or create a dault note'
+    desc = 'Open or create a vault note',
   })
 
   -- Vault sync
@@ -675,7 +675,7 @@ now_if_args(function()
   require('render-markdown').setup({
     file_types = { 'markdown' },
 
-    -- Render while reading; expise raw Markdown while editing.
+    -- Render while reading; expose raw Markdown while editing.
     render_modes = { 'n', 'c', 't' },
 
     pipe_table = {
@@ -718,4 +718,3 @@ now_if_args(function()
   })
   vim.cmd('Mtm')
 end)
-

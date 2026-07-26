@@ -15,8 +15,6 @@ Inspect and update packages managed by native `vim.pack`:
 ```
 
 Review the proposed changes before applying them. Restart Neovim afterward.
-Keep `nvim-pack-lock.json` under version control and review its diff with the
-configuration change.
 
 ### Mason tools
 
@@ -33,8 +31,8 @@ Install missing declared tools on startup. Apply deliberate upgrades with:
 ```
 
 Mason tools are editor-local. System runtimes such as Neovim, Git, a compiler,
-PowerShell, and the .NET SDK remain the responsibility of the operating
-system's package management.
+and PowerShell remain the responsibility of the operating system's package
+management.
 
 ### Tree-sitter parsers
 
@@ -105,7 +103,7 @@ Use one representative project file for every active workflow:
 | Lua | Tree-sitter, `lua_ls`, completion, diagnostics, StyLua |
 | Python | BasedPyright + Ruff attachment, single hover owner, Ruff formatting |
 | Bash | Tree-sitter, Bash LSP, diagnostics |
-| C# | Tree-sitter, Roslyn, project-root detection, .NET availability |
+| C# | Tree-sitter parsing and highlighting |
 | HTML/CSS/TypeScript | Correct LSP, completion, Prettier |
 | JSON/YAML/TOML | Correct LSP, diagnostics, formatter |
 | SQL | Sqruff diagnostics and formatting |
@@ -153,8 +151,7 @@ Before a tagged release:
 3. Start Neovim and allow native packages, Mason tools, and parsers to install.
 4. Run the health checks.
 5. Complete the startup and language smoke tests.
-6. Validate external executables such as `rg`, `lazygit`, Git credentials, and
-   `.NET`.
+6. Validate external executables such as `rg`, `lazygit`, and Git credentials.
 7. Validate platform-specific terminal behavior.
 8. Record any new prerequisite in `README.md` and `docs/tooling.md`.
 
@@ -262,6 +259,5 @@ documented workflow or design decision.
 - [ ] Vault synchronization safety tests pass when changed.
 - [ ] Documentation matches behavior.
 - [ ] `CHANGELOG.md` contains the release.
-- [ ] `nvim-pack-lock.json` is committed.
 - [ ] Working tree is clean.
 - [ ] Version tag is created from the release commit.

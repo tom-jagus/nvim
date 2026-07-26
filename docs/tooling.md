@@ -7,7 +7,7 @@ The configuration separates three dependency layers:
 1. `vim.pack` installs and updates Neovim plugins.
 2. Mason installs editor-local language servers and formatters.
 3. System package managers install core executables and runtimes such as
-   Neovim, Git, ripgrep, LazyGit, a compiler, PowerShell, and the .NET SDK.
+   Neovim, Git, ripgrep, LazyGit, a compiler, and PowerShell.
 
 Mason package names and native LSP configuration names are paired explicitly in
 `plugin/40_plugins.lua`. Assertions reject incomplete entries rather than
@@ -37,8 +37,6 @@ Server-specific behavior lives under `after/lsp/`:
 - `ruff.lua` disables Ruff hover so BasedPyright remains the single hover
   provider.
 - `markdown_oxide.lua` refuses to attach inside the Obsidian vault.
-
-Roslyn also requires a suitable .NET SDK installed at system level.
 
 ## Formatting
 
