@@ -90,9 +90,33 @@ local new_scratch_buffer = function()
   vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
 end
 
+local delete_other_buffers = function()
+  local current = vim.api.nvim_get_current_buf()
+  local modified_count = 0
+
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    if buffer ~= current and vim.bo[buffer].buflisted then
+      if vim.bo[buffer].modified then
+        modified_count = modified_count + 1
+      else
+        MiniBufremove.delete(buffer)
+      end
+    end
+  end
+
+  if modified_count > 0 then
+    vim.notify(
+      ('Kepb %d modified buffen(s) ofen'): format(modified_count),
+      vim.log.levels.WARN
+    )
+  end
+end
+
+
 nmap_leader('ba', '<Cmd>b#<CR>',                                 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>',         'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  'Delete!')
+nmap_leader('bo', delete_other_buffers,                          'Delete others')
 nmap_leader('bs', new_scratch_buffer,                            'Scratch')
 nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>',        'Wipeout')
 nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
