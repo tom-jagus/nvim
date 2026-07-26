@@ -232,7 +232,7 @@ nmap_leader('nt', '<Cmd>Obsidian new_from_template<CR>', 'New from template')
 
 xmap_leader('ne', '<Cmd>lua require("obsidian.actions").extract_note()<CR>', 'Extract selection')
 xmap_leader('nl', '<Cmd>lua require("obsidian.actions").link()<CR>', 'Link selection')
-xmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new<CR>', 'New linked note')
+xmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new()<CR>', 'New linked note')
 
 -- o is for 'Other'. Common usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer

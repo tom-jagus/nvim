@@ -19,20 +19,32 @@ local language_servers = {
   { lsp = "lua_ls", mason = "lua-language-server" },
 
   -- Writing
-  { lps = "markdown_oxide", mason = "markdown-oxide" },
+  { lsp = "markdown_oxide", mason = "markdown-oxide" },
 
   -- Programming languages
   { lsp = "basedpyright", mason = "basedpyright" },
   { lsp = "ruff", mason = "ruff" },
-  { lsp = "roslyn_ls", mason = "typescript-language-server" },
+  { lsp = "roslyn_ls", mason = "roslyn-language-server" },
+
+  { lsp = 'bashls', mason = 'bash-language-server' },
+
+  { lsp = 'html', mason = 'html-lsp' },
+  { lsp = 'cssls', mason = 'css-lsp' },
+  { lsp = 'ts_ls', mason = 'typescript-language-server' },
 
   -- Structured data and config
+  { lsp = 'jsonls', mason = 'json-lsp' },
   { lsp = "yamlls", mason = "yaml-language-server" },
   { lsp = "taplo", mason = "taplo" },
 
   -- Data and databases
   { lsp = "sqruff", mason = "sqruff" },
 }
+
+for _, server in ipairs(language_servers) do
+  assert(server.lsp, 'Missing LSP name for Mason package: ' .. server.mason)
+  assert(server.mason, 'Missing Mason package for LSP: ' .. server.lsp)
+end
 
 local lsp_names = vim.tbl_map(function(server)
   return server.lsp
@@ -45,8 +57,6 @@ end, language_servers)
 vim.list_extend(mason_tools, {
   -- Standalone formatters and linters
   "prettier",
-  "shellcheck",
-  "shfmt",
   "stylua",
 })
 
@@ -214,7 +224,7 @@ later(function()
       css = prettier,
       scss = prettier,
       javascript = prettier,
-      javscriptreact = prettier,
+      javascriptreact = prettier,
       typescript = prettier,
       typescriptreact = prettier,
 
@@ -444,7 +454,7 @@ Config.later(function()
 
     if job <= 0 then
       cleanup()
-      vim.notify("Could not start LazyGit", vim.log.level.ERROR)
+      vim.notify("Could not start LazyGit", vim.log.levels.ERROR)
       return
     end
 
@@ -474,10 +484,10 @@ now_if_args(function()
   local function slugify(title)
     local slug = vim.trim(title or 'untitled'):lower()
 
+    slug = slug:gsub('[@c<>:"/\\|?*]+', '-')
     slug = slug:gsub('[%s_]+', '-')
-    slug = slug:gsub('[^%w%-]+', '-')
     slug = slug:gsub('%-+', '-')
-    slug = slug:gsub('^%-', ''):gsub('%-$', '')
+    slug = slug:gsub('^[%.%- ]+', ''):gsub('[%.%- ]+$', '')
 
     return slug ~= '' and slug or 'untitled'
   end
@@ -491,7 +501,16 @@ now_if_args(function()
       return assert(title)
     end
 
-    return os.date('%Y-%m-%d-%H%M-') .. slugify(title)
+    local base = os.date('%Y-%m-%d-%H%M%S-') .. slugify(title)
+    local id = base
+    local suffix = 2
+
+    while vim.uv.fs_stat(vim.fs.joinpath(tostring(path), id .. '.md')) do
+      id = base .. '-' .. suffix
+      suffix = suffix + 1
+    end
+
+    return id
   end
 
   require('obsidian').setup({

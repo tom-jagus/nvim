@@ -4,7 +4,7 @@ local uv = vim.uv or vim.loop
 
 local defaults = {
   vault = '~/vaults/tom-jagus',
-  deboundes_ms = 60 * 1000,
+  debounce_ms = 60 * 1000,
   sync_on_enter = true,
   notify_auto_success = false,
 }
@@ -12,7 +12,7 @@ local defaults = {
 local config = {}
 
 local state = {
-  times = nil,
+  timer = nil,
   running = false,
   pending = false,
   pending_manual = false,
@@ -132,7 +132,7 @@ local function schedule_automatic_sync()
   state.timer:stop()
 
   state.timer:start(
-    config.debounce.ms,
+    config.debounce_ms,
     0,
     vim.schedule_wrap(function()
       M.sync({
@@ -418,7 +418,7 @@ function M.sync(options)
 
   if state.running then
     state.pending = true
-    state.pending_manual = state.pending or manual
+    state.pending_manual = state.pending_manual or manual
 
     if manual then
       notify('A vault sync is already running; another sync was queued')
