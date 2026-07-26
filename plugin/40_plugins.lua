@@ -533,6 +533,7 @@ now_if_args(function()
       formkat = 'shortest',
       auto_update = false,
     },
+    ui = { enable = false },
   })
 
   vim.api.nvim_create_user_command('VaultQuickNote', function()
@@ -577,4 +578,60 @@ now_if_args(function()
     desc = 'Create a timestamped vault note',
 })
 
+end)
+
+-- Render Markdown
+now_if_args(function()
+  add({
+    {
+      src = 'https://github.com/MeanderingProgrammer/render-markdown.nvim',
+      version = vim.version.range('*'),
+    },
+  })
+
+  require('render-markdown').setup({
+    file_types = { 'markdown' },
+
+    -- Render while reading; expise raw Markdown while editing.
+    render_modes = { 'n', 'c', 't' },
+
+    pipe_table = {
+      enabled = true,
+      preset = 'round',
+      cell = 'padded',
+    },
+
+    latex = { enabled = false },
+  })
+end)
+
+-- Markdown table editing
+now_if_args(function()
+  add({
+    {
+      src = 'https://github.com/Kicamon/markdown-table-mode.nvim',
+      -- version = vim.version.range('*'),
+    },
+  })
+
+  require('markdown-table-mode').setup({
+    filetype = {
+      '*.md',
+    },
+
+    options = {
+      -- Realign while entering pipe separators.
+      insert = true,
+
+      -- Perform a final realignment when leaving insert mode.
+      insert_leave = true,
+
+      -- Produce: | --- | rather than |---|.
+      pad_separator_line = true,
+
+      -- Preserve alignment markers from the separator row.
+      align_style = 'default',
+    },
+  })
+  vim.cmd('Mtm')
 end)
