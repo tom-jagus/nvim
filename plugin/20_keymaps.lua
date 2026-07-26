@@ -59,6 +59,7 @@ Config.leader_group_clues = {
   { mode = 'n', keys = '<Leader>g', desc = '+Git' },
   { mode = 'n', keys = '<Leader>l', desc = '+Language' },
   { mode = 'n', keys = '<Leader>m', desc = '+Map' },
+  { mode = 'n', keys = '<Leader>n', desc = '+Notes' },
   { mode = 'n', keys = '<Leader>o', desc = '+Other' },
   { mode = 'n', keys = '<Leader>s', desc = '+Session' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
@@ -66,6 +67,7 @@ Config.leader_group_clues = {
 
   { mode = 'x', keys = '<Leader>g', desc = '+Git' },
   { mode = 'x', keys = '<Leader>l', desc = '+Language' },
+  { mode = 'x', keys = '<Leader>n', desc = '+Notes' },
 }
 
 -- Helpers for a more concise `<Leader>` mappings.
@@ -209,6 +211,27 @@ nmap_leader('mf', '<Cmd>lua MiniMap.toggle_focus()<CR>', 'Focus (toggle)')
 nmap_leader('mr', '<Cmd>lua MiniMap.refresh()<CR>',      'Refresh')
 nmap_leader('ms', '<Cmd>lua MiniMap.toggle_side()<CR>',  'Side (toggle)')
 nmap_leader('mt', '<Cmd>lua MiniMap.toggle()<CR>',       'Toggle')
+
+-- n is for 'Notes'. These mappings operate on the configured Obsidian vault.
+-- Commands that need a current note are only useful inside a vault buffer.
+nmap_leader('na', '<Cmd>lua require("obsidian.actions").add_tag()<CR>', 'Add tag')
+nmap_leader('nb', '<Cmd>Obsidian backlinks<CR>', 'Backlinks')
+nmap_leader('nd', '<Cmd>Obsidian today<CR>', 'Daily note')
+nmap_leader('nD', '<Cmd>Obsidian dailies<CR>', 'Daily nots')
+nmap_leader('nf', '<Cmd>Obsidian quick_switch<CR>', 'Find note')
+nmap_leader('ng', '<Cmd>Obsidian tags<CR>', 'Fing tags')
+nmap_leader('ni', '<Cmd>lua require("obsidian.actions").insert_tag()<CR>', 'Insert tag')
+nmap_leader('nl', '<Cmd>Obsidian links<CR>', 'Outgoing links')
+nmap_leader('nn', '<Cmd>Obsidian new<CR>', 'New note')
+nmap_leader('np', '<Cmd>Obsidian paste_img<CR>', 'Paste image')
+nmap_leader('nq', '<Cmd>VaultQuickNote<CR>', 'Quick note')
+nmap_leader('nr', '<Cmd>lua vim.lsp.buf.reanme()<CR>', 'Rename note')
+nmap_leader('ns', '<Cmd>Obsidian search<CR>', 'Search contents')
+nmap_leader('nt', '<Cmd>Obsidian new_from_template<CR>', 'New from template')
+
+nmap_leader('ne', '<Cmd>lua require("obsidian.actions").extract_note()<CR>', 'Extract selection')
+nmap_leader('nl', '<Cmd>lua require("obsidian.actions").link()<CR>', 'Link selection')
+nmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new<CR>', 'New linked note')
 
 -- o is for 'Other'. Common usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer

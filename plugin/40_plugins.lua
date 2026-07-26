@@ -16,22 +16,22 @@ local now_if_args, later = Config.now_if_args, Config.later
 -- The first value is used by 'vim.lsp.enable()'o the second by Mason
 local language_servers = {
   -- Neovim
-  { lsp = 'lua_ls', mason = 'lua-language-server' },
+  { lsp = "lua_ls", mason = "lua-language-server" },
 
   -- Writing
-  { lps = 'markdown_oxide', mason = 'maskdownkoxide' },
+  { lps = "markdown_oxide", mason = "markdown-oxide" },
 
   -- Programming languages
-  { lsp = 'basedpyright', mason = 'basedpyright' },
-  { lsp = 'ruff', mason = 'ruff' },
-  { lsp = 'roslyn_ls', mason = 'typescript-language-server' },
+  { lsp = "basedpyright", mason = "basedpyright" },
+  { lsp = "ruff", mason = "ruff" },
+  { lsp = "roslyn_ls", mason = "typescript-language-server" },
 
   -- Structured data and config
-  { lsp = 'yamlls', mason = 'yaml-language-server' },
-  { lsp = 'taplo', mason = 'taplo' },
-  
+  { lsp = "yamlls", mason = "yaml-language-server" },
+  { lsp = "taplo", mason = "taplo" },
+
   -- Data and databases
-  { lsp = 'sqruff', mason = 'sqruff' },
+  { lsp = "sqruff", mason = "sqruff" },
 }
 
 local lsp_names = vim.tbl_map(function(server)
@@ -44,10 +44,10 @@ end, language_servers)
 
 vim.list_extend(mason_tools, {
   -- Standalone formatters and linters
-  'prettier',
-  'shellcheck',
-  'shfmt',
-  'stylua',
+  "prettier",
+  "shellcheck",
+  "shfmt",
+  "stylua",
 })
 
 -- Tree-sitter ================================================================
@@ -190,7 +190,7 @@ later(function()
   -- - `:h Conform`
   -- - `:h conform-options`
   -- - `:h conform-formatters`
-  local prettier = { 'prettier' }
+  local prettier = { "prettier" }
   require("conform").setup({
     default_format_opts = {
       -- Allow formatting from LSP server if no dedicated formatter is available
@@ -222,10 +222,10 @@ later(function()
       json = prettier,
       jsonc = prettier,
       yaml = prettier,
-      toml = { 'taplo' },
+      toml = { "taplo" },
 
       -- Data and databases
-      sql = { 'sqruff' },
+      sql = { "sqruff" },
     },
   })
 end)
@@ -279,11 +279,11 @@ end)
 Config.now(function()
   add({
     "https://github.com/mason-org/mason.nvim",
-    'https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim',
+    "https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim",
   })
   require("mason").setup()
 
-  require('mason-tool-installer').setup({
+  require("mason-tool-installer").setup({
     ensure_installed = mason_tools,
 
     -- Install missing tools on startup, but update only when requested
@@ -294,9 +294,9 @@ Config.now(function()
 
     -- Every item above uses an exact Mason reqistry package name.
     integrations = {
-      ['mason-lspconfig'] = false,
-      ['mason-null-ls'] = false,
-      ['mason-nvim-dap'] = false,
+      ["mason-lspconfig"] = false,
+      ["mason-null-ls"] = false,
+      ["mason-nvim-dap"] = false,
     },
   })
 end)
@@ -457,7 +457,124 @@ end)
 -- CSVView
 Config.later(function()
   add({
-    {src = 'https://github.com/hat0uma/csvview.nvim'}
+    { src = "https://github.com/hat0uma/csvview.nvim" },
   })
-  require('csvview').setup()
+  require("csvview").setup()
+end)
+
+-- Obsidian
+now_if_args(function()
+  add({
+    {
+      src = "https://github.com/obsidian-nvim/obsidian.nvim",
+      version = vim.version.range("*"),
+    },
+  })
+
+  local function slugify(title)
+    local slug = vim.trim(title or 'untitled'):lower()
+    slug = slug:gsub('[%s_]+', '-')
+    slug = slug:gsub('[^%w%-%s_]+', '-')
+    slug = slug:gsub('%-+', '-')
+    slug = slug:gsub('^%-', ''):gsub('%-$', '')
+
+    return slug ~= '' and slug or 'untitled'
+  end
+
+  local function note_id(title, path)
+    local note_dir = vim.fs.normalize(tostring(path)):gsub('\\', '/')
+
+    -- Daily notes retain their date-only ID so repeated calls open the
+    -- existing note instead of generating another timestamped file.
+    if note_dir:match('/daily$') then
+      return assert(title)
+    end
+
+    return os.date('%Y-%m-%d-%H%M-') .. slugify(title)
+  end
+
+  require('obsidian').setup({
+    legacy_commands = false,
+
+    workspaces = {
+      {
+        name = 'tom-jagus',
+        path = '~/vaults/tom-jagus',
+        strict = true,
+      },
+    },
+
+    notes_subdir = 'notes',
+    new_notes_location = 'notes_subdir',
+    note_id_func = note_id,
+
+    daily_notes = {
+      folder = 'daily',
+      date_format = '%Y-%m-%d',
+      workdays_only = false,
+    },
+
+    templates = {
+      folder = 'templates',
+      date_format = '%Y-%m-%d',
+      time_format = '%H:%M',
+    },
+
+    attachments = {
+      folder = 'assets',
+    },
+
+    picker = {
+      name = 'mini.pick'
+    },
+
+    link = {
+      style = 'wiki',
+      formkat = 'shortest',
+      auto_update = false,
+    },
+  })
+
+  vim.api.nvim_create_user_command('VaultQuickNote', function()
+    vim.ui.input({ prompt = 'Quick note title: ' }, function(title)
+      if title == nil or vim.trim(title) == '' then
+        return
+      end
+
+      local note = require('obsidian.note').create({
+        id = title,
+        title = title,
+        aliases = { title },
+        dir = 'inbox',
+      })
+
+      note:write()
+      note:open({ sync = true })
+    end)
+  end, {
+    desc = 'Create a timestamped note in the vault inbox',
+  })
+
+  vim.api.nvim_create_user_command('VaultNewNote', function()
+    vim.ui.input({ prompt = 'New note title: ' }, function(title)
+      title = title and vim.trim(title) or ''
+
+      if title == '' then
+        return
+      end
+
+      local note = require('obsidian.note').create({
+        id = title,
+        title = title,
+        aliases = { title },
+        dir = 'notes',
+      })
+
+      note:write()
+      note:open({ sync = true })
+    end)
+  end, {
+    desc = 'Create a timestamped vault note',
+})
+
 end)
