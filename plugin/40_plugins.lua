@@ -473,8 +473,9 @@ now_if_args(function()
 
   local function slugify(title)
     local slug = vim.trim(title or 'untitled'):lower()
+
     slug = slug:gsub('[%s_]+', '-')
-    slug = slug:gsub('[^%w%-%s_]+', '-')
+    slug = slug:gsub('[^%w%-]+', '-')
     slug = slug:gsub('%-+', '-')
     slug = slug:gsub('^%-', ''):gsub('%-$', '')
 
@@ -530,54 +531,103 @@ now_if_args(function()
 
     link = {
       style = 'wiki',
-      formkat = 'shortest',
+      format = 'shortest',
       auto_update = false,
     },
     ui = { enable = false },
   })
 
-  vim.api.nvim_create_user_command('VaultQuickNote', function()
-    vim.ui.input({ prompt = 'Quick note title: ' }, function(title)
-      if title == nil or vim.trim(title) == '' then
+  local Note = require('obsidian.note')
+  local search = require('obsidian.search')
+  local function normalize_reference(value)
+    value = vim.trim(tostring(value or ''))
+    return vim.fn.tolower(value)
+  end
+
+  local function is_exact_match(note, title)
+    local expected = normalize_reference(title)
+
+    for _, reference in ipairs(note:reference_ids()) do
+      if normalize_reference(reference) == expected then
+        return true
+      end
+    end
+
+    return false
+  end
+
+  local function create_note(title, dir)
+    local note = Note.create({
+      id = title,
+      title = title,
+      aliases = { title },
+      dir = dir,
+    })
+
+    note:write()
+    note:open({ sync = true })
+  end
+
+  local function select_existing_note(matches)
+    if #matches == 1 then
+      matches[1]:open({ sync = true })
+      return
+    end
+
+    vim.ui.select(matches, {
+      prompt = 'Multiple notes use this title:',
+      format_item = function(note)
+        return tostring(note.path)
+      end,
+    }, function(note)
+      if note then
+        note:open({ sync = true })
+      end
+    end)
+  end
+
+  local function open_or_create_note(title, dir)
+    title = vim.trim(title or '')
+
+    if title == '' then
+      return
+    end
+
+    search.resolve_note_async(title, function(results)
+      -- The resolver may return fuzzy results if it finds no exact result.
+      -- Do not treat those as the requested note.
+      local exact_matches = vim.tbl_filter(function(note)
+        return is_exact_match(note, title)
+      end, results)
+
+      if #exact_matches == 0 then
+        create_note(title, dir)
         return
       end
 
-      local note = require('obsidian.note').create({
-        id = title,
-        title = title,
-        aliases = { title },
-        dir = 'inbox',
-      })
-
-      note:write()
-      note:open({ sync = true })
+      select_existing_note(exact_matches)
     end)
+  end
+
+  local function prompt_for_note(prompt, dir)
+    vim.ui.input({
+      prompt = prompt,
+    }, function(title)
+      open_or_create_note(title, dir)
+    end)
+  end
+
+  vim.api.nvim_create_user_command('VaultQuickNote', function()
+    prompt_for_note('Quick note title: ', 'inbox')
   end, {
-    desc = 'Create a timestamped note in the vault inbox',
+    desc = 'Open or create a vault inbox note',
   })
 
   vim.api.nvim_create_user_command('VaultNewNote', function()
-    vim.ui.input({ prompt = 'New note title: ' }, function(title)
-      title = title and vim.trim(title) or ''
-
-      if title == '' then
-        return
-      end
-
-      local note = require('obsidian.note').create({
-        id = title,
-        title = title,
-        aliases = { title },
-        dir = 'notes',
-      })
-
-      note:write()
-      note:open({ sync = true })
-    end)
+    prompt_for_note('New note title: ', 'notes')
   end, {
-    desc = 'Create a timestamped vault note',
-})
-
+  desc = 'Open or create a dault note'
+  })
 end)
 
 -- Render Markdown
@@ -635,3 +685,11 @@ now_if_args(function()
   })
   vim.cmd('Mtm')
 end)
+
+-- Vault sync
+require('custom.vault_sync').setup({
+  vault = '~/vaults/tom-jagus',
+  debounce_ms = 60 * 1000,
+  sync_on_enter = true,
+  notify_auto_success = false,
+})

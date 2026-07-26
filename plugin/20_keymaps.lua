@@ -227,11 +227,12 @@ nmap_leader('np', '<Cmd>Obsidian paste_img<CR>', 'Paste image')
 nmap_leader('nq', '<Cmd>VaultQuickNote<CR>', 'Quick note')
 nmap_leader('nr', '<Cmd>lua vim.lsp.buf.rename()<CR>', 'Rename note')
 nmap_leader('ns', '<Cmd>Obsidian search<CR>', 'Search contents')
+nmap_leader('nS', '<Cmd>VaultSync<CR>', 'Synchronize vault')
 nmap_leader('nt', '<Cmd>Obsidian new_from_template<CR>', 'New from template')
 
-nmap_leader('ne', '<Cmd>lua require("obsidian.actions").extract_note()<CR>', 'Extract selection')
-nmap_leader('nl', '<Cmd>lua require("obsidian.actions").link()<CR>', 'Link selection')
-nmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new<CR>', 'New linked note')
+xmap_leader('ne', '<Cmd>lua require("obsidian.actions").extract_note()<CR>', 'Extract selection')
+xmap_leader('nl', '<Cmd>lua require("obsidian.actions").link()<CR>', 'Link selection')
+xmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new<CR>', 'New linked note')
 
 -- o is for 'Other'. Common usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
