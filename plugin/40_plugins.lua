@@ -24,7 +24,6 @@ local language_servers = {
   -- Programming languages
   { lsp = "basedpyright", mason = "basedpyright" },
   { lsp = "ruff", mason = "ruff" },
-  { lsp = "roslyn_ls", mason = "roslyn-language-server" },
 
   { lsp = 'bashls', mason = 'bash-language-server' },
 
