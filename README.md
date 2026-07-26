@@ -59,7 +59,7 @@ Back up or move an existing Neovim configuration before cloning this one.
 ```bash
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 mv "$config_root/nvim" "$config_root/nvim.backup"
-git clone <repository-url> "$config_root/nvim"
+git clone https://github.com/tom-jagus/nvim "$config_root/nvim"
 nvim
 ```
 
