@@ -23,7 +23,7 @@
 vim.g.mapleader = ' ' -- Use `<Space>` as <Leader> key
 
 vim.o.mouse       = 'a'            -- Enable mouse
-vim.o.mousescroll = 'ver:25,hor:6' -- Customize mouse scroll
+vim.o.mousescroll = 'ver:3,hor:6' -- Customize mouse scroll
 vim.o.switchbuf   = 'usetab'       -- Use already opened buffers when switching
 vim.o.undofile    = true           -- Enable persistent undo
 
@@ -36,11 +36,13 @@ if vim.fn.exists('syntax_on') ~= 1 then vim.cmd('syntax enable') end
 -- UI =========================================================================
 vim.o.breakindent    = true       -- Indent wrapped lines to match line start
 vim.o.breakindentopt = 'list:-1'  -- Add padding for lists (if 'wrap' is set)
-vim.o.colorcolumn    = '+1'       -- Draw column on the right of maximum width
+-- vim.o.colorcolumn    = '+1'       -- Draw column on the right of maximum width
+vim.o.colorcolumn    = '80'       -- Draw a column at fixed width
 vim.o.cursorline     = true       -- Enable current line highlighting
 vim.o.linebreak      = true       -- Wrap lines at 'breakat' (if 'wrap' is set)
 vim.o.list           = true       -- Show helpful text indicators
 vim.o.number         = true       -- Show line numbers
+vim.o.relativenumber = true       -- Show relative numbers to current position
 vim.o.pumborder      = 'single'   -- Use border in popup menu
 vim.o.pumheight      = 10         -- Make popup menu smaller
 vim.o.pummaxwidth    = 100        -- Make popup menu not too wide
@@ -53,11 +55,13 @@ vim.o.splitkeep      = 'screen'   -- Reduce scroll during window split
 vim.o.splitright     = true       -- Vertical splits will be to the right
 vim.o.winborder      = 'single'   -- Use border in floating windows
 vim.o.wrap           = false      -- Don't visually wrap lines (toggle with \w)
+vim.o.scrolloff      = 8          -- Leave extra space when scrolling
+vim.o.clipboard      = "unnamedplus"
 
 vim.o.cursorlineopt  = 'screenline,number' -- Show cursor line per screen line
 
 -- Special UI symbols. More is set via 'mini.basics' later.
-vim.o.fillchars = 'eob: ,fold:╌'
+vim.o.fillchars = 'eob:~,fold:╌'
 vim.o.listchars = 'extends:…,nbsp:␣,precedes:…,tab:> '
 
 -- Folds (see `:h fold-commands`, `:h zM`, `:h zR`, `:h zA`, `:h zj`)
@@ -74,10 +78,12 @@ vim.o.ignorecase    = true    -- Ignore case during search
 vim.o.incsearch     = true    -- Show search matches while typing
 vim.o.infercase     = true    -- Infer case in built-in completion
 vim.o.shiftwidth    = 2       -- Use this number of spaces for indentation
+vim.o.softtabstop   = -1      -- Make <Tab>/<BS> sollow 'shiftwidth'
 vim.o.smartcase     = true    -- Respect case if search pattern has upper case
 vim.o.smartindent   = true    -- Make indenting smart
 vim.o.spelloptions  = 'camel' -- Treat camelCase word parts as separate words
 vim.o.tabstop       = 2       -- Show tab as this number of spaces
+vim.o.shiftround    = true    -- Round indentation to multiples of 'shiftwidth'
 vim.o.virtualedit   = 'block' -- Allow going past end of line in blockwise mode
 
 vim.o.iskeyword = '@,48-57,_,192-255,-' -- Treat dash as `word` textobject part
@@ -127,3 +133,59 @@ local diagnostic_opts = {
 -- Use `later()` to avoid sourcing `vim.diagnostic` on startup
 Config.later(function() vim.diagnostic.config(diagnostic_opts) end)
 -- stylua: ignore end
+
+-- Terminal selection (Windows compatibile) ===================================
+
+if vim.fn.has('win32') == 1 then
+  local shell
+  local is_pwsh = false
+
+  if vim.fn.executable('pwsh') == 1 then
+    shell = 'pwsh'
+    is_pwsh = true
+  elseif vim.fn.executable('powershell') == 1 then
+    shell = 'powershell'
+  end
+
+
+  if shell then
+    vim.o.shell = shell
+
+    vim.o.shelltemp = false
+
+    local command_preamble =
+      '[Console]::InputEncoding='
+      .. '[Console]::OutputEncoding='
+      .. '[System.Text.UTF8Encoding]::new();'
+      .. '$PSDefaultParameterValues["Out-File:Encoding"]="utf8";'
+
+    if is_pwsh then
+      command_preamble =
+        command_preamble
+        .. '$PSStyle.OutputRendering="PlainText";'
+
+      vim.env.__SuppressAnsiEscapeSequences = '1'
+    end
+
+    vim.o.shellcmdflag =
+      '-NoLogo '
+      .. '-NoProfile '
+      .. '-NonInteractive '
+      .. '-ExecutionPolicy RemoteSigned '
+      .. '-Command '
+      .. command_preamble
+
+    vim.o.shellpipe = '> %s 2>&1'
+    vim.o.shellquote = ''
+    vim.o.shellxquote = ''
+  end
+end
+
+-- Terminal not visible in tabline
+local terminal_group = vim.api.nvim_create_augroup('ConfigTerminal', { clear = true })
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = terminal_group,
+  desc = 'Configure terminal buffers',
+  command = 'setlocal nobuflisted bufhidden=wipe',
+})

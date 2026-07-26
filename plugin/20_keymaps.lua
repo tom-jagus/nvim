@@ -19,6 +19,9 @@ end
 nmap('[p', '<Cmd>exe "iput! " . v:register<CR>', 'Paste Above')
 nmap(']p', '<Cmd>exe "iput "  . v:register<CR>', 'Paste Below')
 
+-- Clear search highlight
+nmap('<Esc>', '<Cmd>nohlsearch<CR>', 'Clear search highlight')
+
 -- Many general mappings are created by 'mini.basics'. See 'plugin/30_mini.lua'
 
 -- stylua: ignore start
@@ -56,6 +59,7 @@ Config.leader_group_clues = {
   { mode = 'n', keys = '<Leader>g', desc = '+Git' },
   { mode = 'n', keys = '<Leader>l', desc = '+Language' },
   { mode = 'n', keys = '<Leader>m', desc = '+Map' },
+  { mode = 'n', keys = '<Leader>n', desc = '+Notes' },
   { mode = 'n', keys = '<Leader>o', desc = '+Other' },
   { mode = 'n', keys = '<Leader>s', desc = '+Session' },
   { mode = 'n', keys = '<Leader>t', desc = '+Terminal' },
@@ -63,6 +67,7 @@ Config.leader_group_clues = {
 
   { mode = 'x', keys = '<Leader>g', desc = '+Git' },
   { mode = 'x', keys = '<Leader>l', desc = '+Language' },
+  { mode = 'x', keys = '<Leader>n', desc = '+Notes' },
 }
 
 -- Helpers for a more concise `<Leader>` mappings.
@@ -85,9 +90,33 @@ local new_scratch_buffer = function()
   vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(true, true))
 end
 
+local delete_other_buffers = function()
+  local current = vim.api.nvim_get_current_buf()
+  local modified_count = 0
+
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    if buffer ~= current and vim.bo[buffer].buflisted then
+      if vim.bo[buffer].modified then
+        modified_count = modified_count + 1
+      else
+        MiniBufremove.delete(buffer)
+      end
+    end
+  end
+
+  if modified_count > 0 then
+    vim.notify(
+      ('Kepb %d modified buffen(s) ofen'): format(modified_count),
+      vim.log.levels.WARN
+    )
+  end
+end
+
+
 nmap_leader('ba', '<Cmd>b#<CR>',                                 'Alternate')
 nmap_leader('bd', '<Cmd>lua MiniBufremove.delete()<CR>',         'Delete')
 nmap_leader('bD', '<Cmd>lua MiniBufremove.delete(0, true)<CR>',  'Delete!')
+nmap_leader('bo', delete_other_buffers,                          'Delete others')
 nmap_leader('bs', new_scratch_buffer,                            'Scratch')
 nmap_leader('bw', '<Cmd>lua MiniBufremove.wipeout()<CR>',        'Wipeout')
 nmap_leader('bW', '<Cmd>lua MiniBufremove.wipeout(0, true)<CR>', 'Wipeout!')
@@ -173,6 +202,7 @@ nmap_leader('gl', '<Cmd>' .. git_log_cmd .. '<CR>',         'Log')
 nmap_leader('gL', '<Cmd>' .. git_log_buf_cmd .. '<CR>',     'Log buffer')
 nmap_leader('go', '<Cmd>lua MiniDiff.toggle_overlay()<CR>', 'Toggle overlay')
 nmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>',  'Show at cursor')
+nmap_leader('gg', '<Cmd>LazyGit<CR>', "LazyGit")
 
 xmap_leader('gs', '<Cmd>lua MiniGit.show_at_cursor()<CR>', 'Show at selection')
 
@@ -206,6 +236,28 @@ nmap_leader('mr', '<Cmd>lua MiniMap.refresh()<CR>',      'Refresh')
 nmap_leader('ms', '<Cmd>lua MiniMap.toggle_side()<CR>',  'Side (toggle)')
 nmap_leader('mt', '<Cmd>lua MiniMap.toggle()<CR>',       'Toggle')
 
+-- n is for 'Notes'. These mappings operate on the configured Obsidian vault.
+-- Commands that need a current note are only useful inside a vault buffer.
+nmap_leader('na', '<Cmd>lua require("obsidian.actions").add_tag()<CR>', 'Add tag')
+nmap_leader('nb', '<Cmd>Obsidian backlinks<CR>', 'Backlinks')
+nmap_leader('nd', '<Cmd>Obsidian today<CR>', 'Daily note')
+nmap_leader('nD', '<Cmd>Obsidian dailies<CR>', 'Daily notes')
+nmap_leader('nf', '<Cmd>Obsidian quick_switch<CR>', 'Find note')
+nmap_leader('ng', '<Cmd>Obsidian tags<CR>', 'Fing tags')
+nmap_leader('ni', '<Cmd>lua require("obsidian.actions").insert_tag()<CR>', 'Insert tag')
+nmap_leader('nl', '<Cmd>Obsidian links<CR>', 'Outgoing links')
+nmap_leader('nn', '<Cmd>VaultNewNote<CR>', 'New note')
+nmap_leader('np', '<Cmd>Obsidian paste_img<CR>', 'Paste image')
+nmap_leader('nq', '<Cmd>VaultQuickNote<CR>', 'Quick note')
+nmap_leader('nr', '<Cmd>lua vim.lsp.buf.rename()<CR>', 'Rename note')
+nmap_leader('ns', '<Cmd>Obsidian search<CR>', 'Search contents')
+nmap_leader('nS', '<Cmd>VaultSync<CR>', 'Synchronize vault')
+nmap_leader('nt', '<Cmd>Obsidian new_from_template<CR>', 'New from template')
+
+xmap_leader('ne', '<Cmd>lua require("obsidian.actions").extract_note()<CR>', 'Extract selection')
+xmap_leader('nl', '<Cmd>lua require("obsidian.actions").link()<CR>', 'Link selection')
+xmap_leader('nN', '<Cmd>lua require("obsidian.actions").link_new()<CR>', 'New linked note')
+
 -- o is for 'Other'. Common usage:
 -- - `<Leader>oz` - toggle between "zoomed" and regular view of current buffer
 nmap_leader('or', '<Cmd>lua MiniMisc.resize_window()<CR>', 'Resize to default width')
@@ -227,6 +279,7 @@ nmap_leader('sw', '<Cmd>lua MiniSessions.write()<CR>',          'Write current')
 -- t is for 'Terminal'
 nmap_leader('tT', '<Cmd>horizontal term<CR>', 'Terminal (horizontal)')
 nmap_leader('tt', '<Cmd>vertical term<CR>',   'Terminal (vertical)')
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Enter terminal normal mode' })
 
 -- v is for 'Visits'. Common usage:
 -- - `<Leader>vv` - add    "core" label to current file.
