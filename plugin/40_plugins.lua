@@ -483,8 +483,10 @@ now_if_args(function()
   local vault_name        = 'second-brain'
   local vault_path        = '~/vault/' .. vault_name
   local inbox_path        = 'inbox'
+  local daily_path        = 'daily'
   local notes_path        = 'notes'
   local attachments_path  = 'assets'
+  local templates_path    = 'templates'
 
   local function slugify(title)
     local slug = vim.trim(title or 'untitled'):lower()
@@ -534,13 +536,13 @@ now_if_args(function()
     note_id_func = note_id,
 
     daily_notes = {
-      folder = 'daily',
+      folder = daily_path,
       date_format = '%Y-%m-%d',
       workdays_only = false,
     },
 
     templates = {
-      folder = 'templates',
+      folder = templates_path,
       date_format = '%Y-%m-%d',
       time_format = '%H:%M',
     },
