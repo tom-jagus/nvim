@@ -361,38 +361,55 @@ Config.now(function()
   vim.cmd.colorscheme("catppuccin-mocha")
 end)
 
--- Nvim-tmux-navigation
+-- -- Nvim-tmux-navigation
+-- Config.later(function()
+--   local is_windows = vim.fn.has("win32") == 1
+--
+--   if is_windows then
+--     return
+--   end
+--
+--   add({
+--     {
+--       src = "https://github.com/alexghergh/nvim-tmux-navigation",
+--     },
+--   })
+--
+--   -- MiniBasics remains responsible for navigation outside tmux.
+--   if not vim.env.TMUX then
+--     return
+--   end
+--
+--   local navigation = require("nvim-tmux-navigation")
+--
+--   navigation.setup({
+--     disable_when_zoomed = true,
+--   })
+--
+--   local map = vim.keymap.set
+--   local opts = { silent = true }
+--
+--   map("n", "<C-h>", navigation.NvimTmuxNavigateLeft, opts)
+--   map("n", "<C-j>", navigation.NvimTmuxNavigateDown, opts)
+--   map("n", "<C-k>", navigation.NvimTmuxNavigateUp, opts)
+--   map("n", "<C-l>", navigation.NvimTmuxNavigateRight, opts)
+-- end)
+
+-- Herdr navigation
 Config.later(function()
-  local is_windows = vim.fn.has("win32") == 1
-
-  if is_windows then
-    return
-  end
-
-  add({
-    {
-      src = "https://github.com/alexghergh/nvim-tmux-navigation",
-    },
-  })
-
-  -- MiniBasics remains responsible for navigation outside tmux.
-  if not vim.env.TMUX then
-    return
-  end
-
-  local navigation = require("nvim-tmux-navigation")
-
-  navigation.setup({
-    disable_when_zoomed = true,
-  })
-
+  add({'https://github.com/lmilojevicc/herdr-splits.nvim'})
+  local navigation = require('herdr-splits')
   local map = vim.keymap.set
   local opts = { silent = true }
 
-  map("n", "<C-h>", navigation.NvimTmuxNavigateLeft, opts)
-  map("n", "<C-j>", navigation.NvimTmuxNavigateDown, opts)
-  map("n", "<C-k>", navigation.NvimTmuxNavigateUp, opts)
-  map("n", "<C-l>", navigation.NvimTmuxNavigateRight, opts)
+    map('n', '<C-h>', navigation.move_cursor_left,  opts)
+    map('n', '<C-j>', navigation.move_cursor_down,  opts)
+    map('n', '<C-k>', navigation.move_cursor_up,    opts)
+    map('n', '<C-l>', navigation.move_cursor_right, opts)
+    map('n', '<M-h>', navigation.resize_left,       opts)
+    map('n', '<M-j>', navigation.resize_down,       opts)
+    map('n', '<M-k>', navigation.resize_up,         opts)
+    map('n', '<M-l>', navigation.resize_right,      opts)
 end)
 
 -- LazyGit
